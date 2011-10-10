@@ -1,8 +1,7 @@
-use Test::t;
+use Test::More 'no_plan';
 use Test::Legal::Util 'load_meta';
 
 
-#my $version = '5.01000';
 
 my $dir     = $ENV{PWD} =~ m#\/t$#  ? 'dat' : 't/dat';
 

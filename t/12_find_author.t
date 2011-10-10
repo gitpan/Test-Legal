@@ -1,4 +1,4 @@
-use Test::t;
+use Test::More 'no_plan';
 use Test::Legal::Util qw/find_author load_meta/;
 
 

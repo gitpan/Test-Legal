@@ -1,13 +1,13 @@
 Test-Legal version 0.01
 =======================
 
- Test::Legal cheks for LICENSE file, for copyright annotations
+ Test::Legal checks for LICENSE file, for copyright annotations
 in .pl and .pm files of lib/ and script/ directories, and some
 legal-related fields of META.yml (or META.json). 
 
- Problems are fixable manually in the usaual way, or use the
-the included copyright-injection.pl and license-injetion.pl to
-fix them using scripts. (See the EXAMLES dir, or type --help .)
+ Problems are fixable manually in the usual way, or use 
+the included copyright-injection.pl and license-injection.pl to
+fix them using scripts. (See the EXAMPLES dir, or type --help .)
 
 
 INSTALLATION

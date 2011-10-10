@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Legal.
 
+0.02  Mon Oct  10  9:03:39 2011
+   - Fixed the prototype mismatch warnings
+   - we always preserve file mode bits 
+
 0.01  Mon Oct  3 23:01:59 2011
 	- original version; created by h2xs 1.23 with options
 		-AX Test::Legal

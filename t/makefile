@@ -18,10 +18,10 @@ current = 17_license_text.t
 current = 21_values.t
 current = 11_load_meta.t
 
-#all:add
+all:check
 ##all: t
 #all: pod
-all: $(current)
+#all: $(current)
 
 tel:
 	$(vi)  ../examples/script/tel2num.pl   ../examples/script/tel2mnemonic.pl
@@ -29,11 +29,9 @@ tel:
 	perl $(OPT) $@
 license_injector li:
 	perl $(OPT) ../script/license-injector.pl  ../examples   check
-check remove t list:
-	#perl $(OPT) ../script/copyright-injector.pl -d  ../examples   $@
-	perl $(OPT) ../script/license-injector.pl -d  ../examples   $@
-add:
-	perl $(OPT) ../script/license-injector.pl -d  ../examples  $@
+check add remove t list:
+	perl $(OPT) ../script/copyright-injector.pl -d  ../examples   $@
+	#perl $(OPT) ../script/license-injector.pl -d  ../examples   $@
 pod: 
 	perldoc  ../blib/lib/Test/Legal.pm 
 podu: 

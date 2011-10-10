@@ -4,7 +4,7 @@ package Test::Legal::Util;
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 #use Data::Show;
 use File::Slurp 'slurp';
 use CPAN::Meta;
@@ -67,9 +67,12 @@ sub _annotate_copyright {
 	return  unless -T $file ;
 	# Don't annotate if already annotated
 	return   if is_annotated($file,$msg);
+    my $perms = ((stat($file))[2]) & 07777 ;
+    #DEBUG  sprintf( "perms are %04o\n", $perms) ;
 	open my ($in), '<', $file  or return;
 	unlink $file;
 	open my ($out), '>', "$file";
+    chmod($perms | 0600, $out);
 	print {$out} scalar <$in>;
 	print {$out} $msg,"\n";
 	print {$out}  <$in> ;
@@ -101,11 +104,12 @@ sub annotate_copyright {
 sub _deannotate_copyright {
     my ($file, $msg) = @_ ;
 	return  unless -T $file ;
+    my $perms = ((stat($file))[2]) & 07777 ;
+    #DEBUG  sprintf( "perms are %04o\n", $perms) ;
 	my $content = slurp $file or return;
-	#open my ($in), '<', $file  or return;
-	#unlink $file;
 	$content =~ s/\Q$msg\E//g ;
 	open my ($out), '>', "$file";
+    chmod($perms | 0600, $out);
 	print {$out}  $content;
 }
 =pod

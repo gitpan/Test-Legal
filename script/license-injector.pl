@@ -8,6 +8,7 @@ use Data::Dumper;
 use File::Slurp;
 use Test::Legal::Util qw/ write_LICENSE license_types /; 
 use Log::Log4perl ':easy';
+our $VERSION = '0.02';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
