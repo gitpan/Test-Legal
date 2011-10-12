@@ -1,14 +1,17 @@
 use Test::More 'no_plan';
 use File::Copy 'cp';
-use Test::Legal::Util qw/ default_copyright_notice annotate_copyright is_annotated/;
+use Test::Legal::Util qw/ annotate_copyright /;
 use File::Find::Rule;
+
+*  default_copyright_notice = * Test::Legal::Util::default_copyright_notice;
+* is_annotated              = * Test::Legal::Util::is_annotated ;
 
 
 my $msg = '# Copyright (C) by  bottle';
 
 my $dir     = $ENV{PWD} =~ m#\/t$#  ? 'dat' : 't/dat';
 
-like default_copyright_notice, qr/^# Copyright \(C\) \d{4}/o ;
+like default_copyright_notice(), qr/^# Copyright \(C\) \d{4}/o ;
 
 my $num = my @files = ( "$dir/blank", "$dir/blank2", "$dir/apple" );
 note 'copy files';

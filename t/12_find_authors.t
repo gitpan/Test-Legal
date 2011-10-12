@@ -1,6 +1,7 @@
 use Test::More 'no_plan';
-use Test::Legal::Util qw/find_authors load_meta/;
+use Test::Legal::Util qw/load_meta/;
 
+* find_authors = * Test::Legal::Util::find_authors;
 
 #my $version = '5.01000';
 
@@ -15,5 +16,5 @@ is find_authors("$dir/wrong/$_.yml"), 'Butthead, Ioannis Tambouras, Sun Trieb'  
 is find_authors("$dir/wrong/noauthor.yml"), 'unknown' ;
 
 # Returns undef
-ok ! find_authors  for (undef, '', '/etc');
+ok ! find_authors($_)  for (undef, '', '/etc');
 

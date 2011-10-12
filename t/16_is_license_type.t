@@ -1,6 +1,7 @@
 use Test::More 'no_plan';
-use Test::Legal::Util qw/ is_license_type /;
-use Data::Show;
+use Test::Legal::Util; 
+
+* is_license_type = * Test::Legal::Util::is_license_type;
 
 
 

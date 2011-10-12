@@ -1,7 +1,7 @@
 use Test::More 'no_plan';
-use Test::Legal::Util qw/ license_types  license_text/;
-use Data::Show;
+use Test::Legal::Util qw/ license_types  /;
 
+* license_text = *Test::Legal::Util::license_text;
 
 
 my $dir     = $ENV{PWD} =~ m#\/t$#  ? 'dat' : 't/dat';

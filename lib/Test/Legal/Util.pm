@@ -4,7 +4,7 @@ package Test::Legal::Util;
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 #use Data::Show;
 use File::Slurp 'slurp';
 use CPAN::Meta;
@@ -15,9 +15,8 @@ use IO::Prompter;
 use base 'Exporter';
 
 our @EXPORT_OK = qw( 
-	annotate_copyright          find_authors     load_meta
-	default_copyright_notice    is_annotated     deannotate_copyright
-	howl_notice                 is_license_type  license_types license_text
+	annotate_copyright          load_meta              license_types 
+	deannotate_copyright        howl_notice                 
 	write_LICENSE               check_license_files
 );
 =pod
@@ -39,6 +38,105 @@ sub howl_notice {
 }
 =pod
 
+=head2  annotate_copyright
+ Annotates one or more files . 
+ Input: file (or arrayref of files), copyright notice
+ Output: number of files annotated
+=cut
+sub annotate_copyright {
+    my ($files, $msg) = @_ ;
+	$msg //= default_copyright_notice();
+	return unless $msg;
+	return _annotate_copyright($files,$msg)  unless ref $files;
+	my $i=0;
+	_annotate_copyright($_,$msg) && $i++ for @$files;
+	$i;
+}
+=pod
+
+=head2  deannotate_copyright
+ Removes copyright from one or more files . 
+ Input: file (or arrayref of files), copyright notice
+ Output: number of files deannotated
+=cut
+sub deannotate_copyright {
+    my ($files, $msg) = @_ ;
+	$msg //= default_copyright_notice();
+	return unless $msg;
+	return _deannotate_copyright($files,$msg)  unless ref $files;
+	my $i=0;
+	_deannotate_copyright($_,$msg) && $i++ for @$files;
+	$i;
+}
+=pod
+
+=head2  load_meta
+ Input: filename or dir or CPAN::Meta object
+ Output: CPAN::Meta object
+ Loads either META.json (preferred) or META.yml
+=cut
+sub load_meta {
+	my $base = shift || return;
+    return $base if UNIVERSAL::isa($base,'CPAN::Meta');
+	return CPAN::Meta->load_file($base) if -T $base and -r _ ;
+    first {$_} 
+    map { -T and -r and CPAN::Meta->load_file($_)  }
+    map { $base . "/$_"}
+        qw/ META.json META.yml /;
+}
+=pod
+
+=head2  license_types
+
+=cut
+sub license_types {
+	qw/ 
+		AGPL_3       BSD          GFDL_1_3     LGPL_3_0     OpenSSL      Sun
+		Apache_1_1   CC0_1_0      GPL_1        MIT          Perl_5       Zlib
+		Apache_2_0   Custom       GPL_2        Mozilla_1_0  PostgreSQL
+		Artistic_1_0 FreeBSD      GPL_3        Mozilla_1_1  QPL_1_0
+		Artistic_2_0 GFDL_1_2     LGPL_2_1     None         SSLeay
+	/;
+}
+=pod
+
+=head2  write_LICENSE
+
+ Writes the LICENSE file
+Input: 
+Output: the specific license object
+
+=cut
+sub write_LICENSE {
+	my ($dir, $author, $type) = @_ ;
+	my $meta  = load_meta($dir);
+	$author //=  find_authors($meta);
+	$type   //= find_license($meta) || return;
+	my $lok   = check_META_file($dir);
+	$lok or INFO($::o->usage) and INFO( qq(The "list" command lists available licenses))  and return  ;
+    unless ($::opts->{yes}) {
+		 -T "$dir/LICENSE"  ?  (prompt '-yes', 'Overide LICENSE?') ||  return  : 1;
+    }
+ 	DEBUG 'Adding LICENSE file';
+ 	open my ($o), '>', "$dir/LICENSE" or die$! ;
+ 	say {$o} $lok->fulltext;
+}
+=pod
+
+=head2 check_license_files
+ Input:  base directory
+ Performs and outputs diagnostics 
+=cut
+sub check_license_files {
+	my $dir = shift || return;
+	check_LICENSE_file( $dir); 
+	check_META_file( $dir); 
+}
+
+#no namespace::clean;
+
+=pod
+
 =head2  is_annotated
  Input: filename and message
  Output: True, if file is already annotated with this message;
@@ -46,9 +144,16 @@ sub howl_notice {
 =cut
 sub is_annotated {
     my ($file, $msg) = @_ ;
+	#$msg //= qr/\s*(\#{0,3})? \s* Copyright \s* \Q (c)\E/oxim;
+	$msg //= 'copyright (c)';
 	my $contents = slurp $file  or return;
 	 () = $contents =~ /\Q$msg/gis ;
+	# () = $contents =~ (ref $msg eq 'Regexp') ? $msg : /\Q$msg/gis;
 }
+=pod
+
+=head2  default_copyright_notice
+=cut
 sub default_copyright_notice {
 	my $geco =  ucfirst ([getpwuid $<]->[6] || getlogin);
 	my $year =  1900 + [localtime]->[5];
@@ -79,22 +184,6 @@ sub _annotate_copyright {
 }
 =pod
 
-=head2  annotate_copyright
- Annotates one or more files . 
- Input: file (or arrayref of files), copyright notice
- Output: number of files annotated
-=cut
-sub annotate_copyright {
-    my ($files, $msg) = @_ ;
-	$msg //= default_copyright_notice;
-	return unless $msg;
-	return _annotate_copyright($files,$msg)  unless ref $files;
-	my $i=0;
-	_annotate_copyright($_,$msg) && $i++ for @$files;
-	$i;
-}
-=pod
-
 =head2  _deannotate_copyright
  Remove copyright from  one file . 
  Assumptions: msg already validated
@@ -111,38 +200,6 @@ sub _deannotate_copyright {
 	open my ($out), '>', "$file";
     chmod($perms | 0600, $out);
 	print {$out}  $content;
-}
-=pod
-
-=head2  deannotate_copyright
- Removes copyright from one or more files . 
- Input: file (or arrayref of files), copyright notice
- Output: number of files deannotated
-=cut
-sub deannotate_copyright {
-    my ($files, $msg) = @_ ;
-	$msg //= default_copyright_notice;
-	return unless $msg;
-	return _deannotate_copyright($files,$msg)  unless ref $files;
-	my $i=0;
-	_deannotate_copyright($_,$msg) && $i++ for @$files;
-	$i;
-}
-=pod
-
-=head2  load_meta
- Input: filename or dir or CPAN::Meta object
- Output: CPAN::Meta object
- Loads either META.json (preferred) or META.yml
-=cut
-sub load_meta {
-	my $base = shift || return;
-    return $base if UNIVERSAL::isa($base,'CPAN::Meta');
-	return CPAN::Meta->load_file($base) if -T $base and -r _ ;
-    first {$_} 
-    map { -T and -r and CPAN::Meta->load_file($_)  }
-    map { $base . "/$_"}
-        qw/ META.json META.yml /;
 }
 =pod
 
@@ -179,20 +236,6 @@ sub find_license {
 }
 =pod
 
-=head2  license_types
-
-=cut
-sub license_types {
-	qw/ 
-		AGPL_3       BSD          GFDL_1_3     LGPL_3_0     OpenSSL      Sun
-		Apache_1_1   CC0_1_0      GPL_1        MIT          Perl_5       Zlib
-		Apache_2_0   Custom       GPL_2        Mozilla_1_0  PostgreSQL
-		Artistic_1_0 FreeBSD      GPL_3        Mozilla_1_1  QPL_1_0
-		Artistic_2_0 GFDL_1_2     LGPL_2_1     None         SSLeay
-	/;
-}
-=pod
-
 =head2  is_license_type
 
 =cut
@@ -217,40 +260,6 @@ sub license_text {
 	eval "use $type";
     return if $@;
 	$type->new( { holder=>$holder}  );
-}
-=pod
-
-=head2  write_LICENSE
-
- Writes the LICENSE file
-Input: 
-Output: the specific license object
-
-=cut
-sub write_LICENSE {
-	my ($dir, $author, $type) = @_ ;
-	my $meta  = load_meta($dir);
-	$author //=  find_authors($meta);
-	$type   //= find_license($meta) || return;
-	my $lok   = check_META_file($dir);
-	$lok or INFO($::o->usage) and INFO( qq(The "list" command lists available licenses))  and return  ;
-    unless ($::opts->{yes}) {
-		 -T "$dir/LICENSE"  ?  (prompt '-yes', 'Overide LICENSE?') ||  return  : 1;
-    }
- 	DEBUG 'Adding LICENSE file';
- 	open my ($o), '>', "$dir/LICENSE" or die$! ;
- 	say {$o} $lok->fulltext;
-}
-=pod
-
-=head2 check_license_files
- Input:  base directory
- Performs and outputs diagnostics 
-=cut
-sub check_license_files {
-	my $dir = shift || return;
-	check_LICENSE_file( $dir); 
-	check_META_file( $dir); 
 }
 =pod
 
@@ -284,6 +293,7 @@ sub check_META_file {
 	return $text;
 }
 
+#use namespace::clean;
 1;
 __END__
 

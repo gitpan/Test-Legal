@@ -18,7 +18,9 @@ current = 16_is_license_type.t
 current = 17_license_text.t
 current = 18_find_license.t
 current = 19_check_meta.t
+current = 20_namespace_clean.t
 current = 21_values.t
+current = 22_is_annotated.t
 
 all:li
 ##all: t

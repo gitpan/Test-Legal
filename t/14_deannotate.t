@@ -1,7 +1,10 @@
 use Test::More 'no_plan';
 use File::Copy 'cp';
-use Test::Legal::Util qw/ default_copyright_notice deannotate_copyright is_annotated/;
+use Test::Legal::Util qw/ deannotate_copyright /;
 use File::Find::Rule;
+
+* is_annotated              = * Test::Legal::Util::is_annotated ;
+
 
 my $msg = '# Copyright by  bottle';
 

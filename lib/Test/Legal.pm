@@ -3,7 +3,7 @@ package Test::Legal;
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use Sub::Exporter;
 
 use CPAN::Meta;
@@ -14,10 +14,9 @@ use Log::Log4perl ':easy';
 use List::Compare;
 use IO::Prompter;
 use Test::Builder::Module;
-use Test::Legal::Util qw/ 
-		annotate_copyright   default_copyright_notice 
-		deannotate_copyright load_meta
-/;
+use Test::Legal::Util qw/ annotate_copyright   deannotate_copyright load_meta /;
+
+
 use Sub::Exporter -setup => { exports => [ qw/ disable_test_builder annotate_dirs deannotate_dirs/, 
  										  copyright_ok => \'_build_copyright_ok' ,
                                            license_ok   => \'_build_license_ok'],
