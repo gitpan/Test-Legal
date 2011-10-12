@@ -4,7 +4,7 @@ package Test::Legal::Util;
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 #use Data::Show;
 use File::Slurp 'slurp';
 use CPAN::Meta;
@@ -15,10 +15,10 @@ use IO::Prompter;
 use base 'Exporter';
 
 our @EXPORT_OK = qw( 
-	annotate_copyright          find_author      load_meta
+	annotate_copyright          find_authors     load_meta
 	default_copyright_notice    is_annotated     deannotate_copyright
 	howl_notice                 is_license_type  license_types license_text
-	write_LICENSE
+	write_LICENSE               check_license_files
 );
 =pod
 
@@ -131,28 +131,51 @@ sub deannotate_copyright {
 =pod
 
 =head2  load_meta
- Input: filename
+ Input: filename or dir or CPAN::Meta object
  Output: CPAN::Meta object
+ Loads either META.json (preferred) or META.yml
 =cut
 sub load_meta {
-    my $_ = shift||return;
-    -T and -r  and CPAN::Meta->load_file($_) ;
+	my $base = shift || return;
+    return $base if UNIVERSAL::isa($base,'CPAN::Meta');
+	return CPAN::Meta->load_file($base) if -T $base and -r _ ;
+    first {$_} 
+    map { -T and -r and CPAN::Meta->load_file($_)  }
+    map { $base . "/$_"}
+        qw/ META.json META.yml /;
 }
 =pod
 
-=head2  find_author
+=head2  find_authors
  Input:  filename or CPAN::Meta object
+ Output: all  authors mentioned in CPAN::Meta. 
+	     Returns 'unknown' if no authors found, or
+                  undef for other failures
+ Authors are are non-repeating and never in "Last, First" format
+=cut
+sub find_authors {
+    my $meta = shift||return;
+	$meta = load_meta($meta) || return;;
+    my @authors = map { s/^\s*|\s*$//o; $_}
+				 map { s/([^,]+),(.+)/$2 $1/o; $_}
+				 map { s/\W*<.*>\s*//so; $_}
+				$meta->author; 
+	my $h;
+	@{$h}{@authors} = (1)x@authors;
+    join ', ', sort keys %$h;
+}
+=pod
+
+=head2  find_license
+ Input:  directory or CPAN::Meta object
  Output: 1st author mentioned in CPAN::Meta. 
          Returns undef  on failure
 =cut
-sub find_author {
+sub find_license {
     my $meta = shift||return;
-	$meta = load_meta($meta) unless UNIVERSAL::isa($meta,'CPAN::Meta');
-	return unless $meta;
-	return unless UNIVERSAL::isa($meta,'CPAN::Meta');
-    my ($author) =  $meta->author or return '';
-    $author =~ s/\s*<.*>\s*//;
-    $author;
+	$meta = load_meta($meta) || return;
+    my ($license) =  $meta->license or return '';
+    ucfirst $license;
 }
 =pod
 
@@ -188,11 +211,12 @@ Output: the specific license object
 sub license_text {
 	my ($type, $holder) = @_;
 	return unless $type||'' =~ /^\w{2,16}$/o;
+	#$holder //= find_authors();
+	$holder //= getlogin;
     $type = 'Software::License::'. ucfirst($type|| return);
 	eval "use $type";
     return if $@;
-	#$holder or $holder=find_author; TODO
-	$type->new( { holder=>($holder||return)}  );
+	$type->new( { holder=>$holder}  );
 }
 =pod
 
@@ -204,25 +228,61 @@ Output: the specific license object
 
 =cut
 sub write_LICENSE {
-	my ($file, $author, $type) = @_ ;
-	$author //=  getlogin;
-	$type //=  'Perl_5';
-	#say "author=$author, type=$type";
-	my $lok = is_license_type($type);
-	DEBUG qq(Cheking type "$type".....)  . ($lok ? 'ok' : 'FAIL');
-	$lok or INFO($::o->usage) and INFO( qq(The "list" command lists available licenses))  and exit 1 ;
-	# find author
-	$lok = license_text( $type, $author );
-	DEBUG qq(Text available for "$type".....) . ($lok ? 'ok' : 'FAIL');
-	$lok or INFO("License text not available") and  exit 1 ;
+	my ($dir, $author, $type) = @_ ;
+	my $meta  = load_meta($dir);
+	$author //=  find_authors($meta);
+	$type   //= find_license($meta) || return;
+	my $lok   = check_META_file($dir);
+	$lok or INFO($::o->usage) and INFO( qq(The "list" command lists available licenses))  and return  ;
     unless ($::opts->{yes}) {
-		 -T $file  ?  (prompt '-yes', 'Overide LICENSE?') ||  return  : 1;
+		 -T "$dir/LICENSE"  ?  (prompt '-yes', 'Overide LICENSE?') ||  return  : 1;
     }
  	DEBUG 'Adding LICENSE file';
- 	open my ($o), '>', $file or die$! ;
+ 	open my ($o), '>', "$dir/LICENSE" or die$! ;
  	say {$o} $lok->fulltext;
 }
+=pod
 
+=head2 check_license_files
+ Input:  base directory
+ Performs and outputs diagnostics 
+=cut
+sub check_license_files {
+	my $dir = shift || return;
+	check_LICENSE_file( $dir); 
+	check_META_file( $dir); 
+}
+=pod
+
+=head2 check_LICENSE_file
+ Input:  base directory
+ Performs and outputs diagnostics 
+=cut
+sub check_LICENSE_file {
+	my $dir = shift || return;
+	INFO 'Searching for LICENSE ....  ' . 
+	((-T "$dir/LICENSE" and -r _ ) ? 'found' : 'not found');
+}
+=pod
+
+=head2 check_META_file
+ Input:  base directory
+ Output: Software::License:xxx object, or undef
+ Performs and outputs diagnostics 
+=cut
+sub check_META_file {
+	my $meta = load_meta(shift||return) ;
+	DEBUG 'Searching for META ....  ' .  ($meta ? 'found' : 'not found');
+	return unless $meta;
+	my $license = find_license($meta) or return;
+	DEBUG '   extracting license type ....  ' .  ($license ? $license : 'NOT found');
+	DEBUG '   license type is valid ....  ' .  (is_license_type($license) ? 'yes': 'no');
+	my $authors = find_authors($meta);
+	DEBUG '   authors ....  ' .  ($authors eq 'unknown' ? return : $authors);
+	my $text = license_text( $license, 'author');
+	DEBUG '   license text is available ....  ' .  ($text ?'yes':'no');
+	return $text;
+}
 
 1;
 __END__

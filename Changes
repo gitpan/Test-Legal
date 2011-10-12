@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Legal.
 
+0.03  Tue Oct  11  3:39:24 2011
+	- added mod bit tests
+	- re-implemented find_author() as find_authors() to find non-duplicate and multiple authors
+
 0.02  Mon Oct  10  9:03:39 2011
    - Fixed the prototype mismatch warnings
    - we always preserve file mode bits 

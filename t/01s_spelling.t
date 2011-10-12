@@ -28,3 +28,6 @@ ref
 deannotated
 Tambouras
 perms
+dir
+json
+yml

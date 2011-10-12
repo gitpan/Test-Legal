@@ -25,6 +25,8 @@ is_deeply [sort keys %{_values()}   ] , $required_keys;
 
 ok ! _values([]);
 
+TODO: {
+	local $TODO = 'why does it fail?';
+	ok ! _values();
+}
 
-
-#ok 1;

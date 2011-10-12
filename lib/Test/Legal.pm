@@ -3,7 +3,7 @@ package Test::Legal;
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use Sub::Exporter;
 
 use CPAN::Meta;
@@ -16,7 +16,7 @@ use IO::Prompter;
 use Test::Builder::Module;
 use Test::Legal::Util qw/ 
 		annotate_copyright   default_copyright_notice 
-		deannotate_copyright find_author          load_meta
+		deannotate_copyright load_meta
 /;
 use Sub::Exporter -setup => { exports => [ qw/ disable_test_builder annotate_dirs deannotate_dirs/, 
  										  copyright_ok => \'_build_copyright_ok' ,
@@ -74,10 +74,7 @@ sub _values {
 	$arg //= {};
     return unless ref $arg eq 'HASH';	
     $arg = { %{DEFAULTS()}, %$arg };
-    ($arg->{ meta }) = first {$_} 
-                       map { -f and load_meta($_) }
-                       map { $arg->{base} . "/$_"}   
-                       qw/ META.json META.yml /;
+    ($arg->{ meta }) = load_meta( $arg->{base} )  ;
     $arg->{meta} || die 'no META file in dir "'. $arg->{base}.qq("\n);
     $arg;
 }
@@ -142,7 +139,6 @@ sub _build_copyright_ok {
     my ($class, $fun, $arg) = @_;
     $arg       = _values($arg);  
     my @dirs   = map {$arg->{base} . "/$_"} @{$arg->{dirs}};
-    #my $author = find_author( $arg->{meta}) ||'';
     sub {
 		my $pat = shift;
 		$pat //= 'Copyright (C)';

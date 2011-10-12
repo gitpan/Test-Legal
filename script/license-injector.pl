@@ -6,9 +6,9 @@ use v5.10;
 use Getopt::Compact;
 use Data::Dumper;
 use File::Slurp;
-use Test::Legal::Util qw/ write_LICENSE license_types /; 
+use Test::Legal::Util qw/ check_license_files  write_LICENSE license_types /; 
 use Log::Log4perl ':easy';
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
@@ -44,7 +44,7 @@ use Test::Legal  qw/ disable_test_builder /,
 DEBUG 'Scanning '. BASE ;
 given (ACTION) {
 	when (/^add$/i)   { disable_test_builder;
-	                    write_LICENSE  BASE.'/LICENSE', @{$opts}{'author','type'};
+	                    write_LICENSE  BASE , @{$opts}{'author','type'};
 	                  }
 	when (/^remove$/i){ disable_test_builder;
 						unlink BASE.'/LICENSE'  or warn "$!\n" and exit 1;
@@ -54,8 +54,7 @@ given (ACTION) {
 			            INFO join "\t", license_types
                       }
 	when (/^check$/i) { disable_test_builder;
-					    -T BASE.'/LICENSE' and -r _ or INFO "LICENSE does not exist" and exit 1;
-                        DEBUG "Found LICENSE";
+			            check_license_files( BASE );
                       }
 	when (/^t$/i)     { license_ok ;
                       }

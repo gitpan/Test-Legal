@@ -1,8 +1,6 @@
 ---
 abstract: ' Check for copyright notices in distribution files and for LICENSE file'
 author:
-  - 'Tambouras, Ioannis <ioannis@cpan.org>'
-  - 'Ioannis Tambouras <ioannis@cpan.org>'
 build_requires:
   ExtUtils::MakeMaker: 6.42
   File::Copy: 2.18
@@ -21,7 +19,7 @@ configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
 generated_by: 'Module::Install version 1.01'
-license: perl
+license: gpi
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
@@ -45,6 +43,4 @@ requires:
   Sub::Exporter: 0.982
   Test::Builder::Module: 0.98
   perl: 5.10.0
-resources:
-  license: http://dev.perl.org/licenses/
 version: 0.03

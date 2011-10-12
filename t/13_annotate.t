@@ -1,5 +1,5 @@
 use Test::More 'no_plan';
-use File::Copy;
+use File::Copy 'cp';
 use Test::Legal::Util qw/ default_copyright_notice annotate_copyright is_annotated/;
 use File::Find::Rule;
 
@@ -12,7 +12,8 @@ like default_copyright_notice, qr/^# Copyright \(C\) \d{4}/o ;
 
 my $num = my @files = ( "$dir/blank", "$dir/blank2", "$dir/apple" );
 note 'copy files';
-copy $_ , $dir     for  map { (my $f=$_) =~ s{(/[^/]*$)}{/bak$1}; $f }  @files  ;
+cp $_ , $dir     for  map { (my $f=$_) =~ s{(/[^/]*$)}{/bak$1}; $f }  @files  ;
+chmod 0750, "$dir/blank2";
 
 
 note 'now, annote them';
@@ -28,6 +29,7 @@ is_deeply [sort @n], [sort @files];
 note 'check2 for annoted files';
 is is_annotated($_,$msg), 1, "$_: is_annotated only once"  for @files;
 
-unlink @files;
+is +((stat("$dir/blank2"))[2] & 07777), 0750, 'mode bits' ;
 
+unlink @files;
 ok ! annotate_copyright(['/tmp/hots']);

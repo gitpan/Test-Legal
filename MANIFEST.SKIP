@@ -5,6 +5,7 @@ Makefile$
 TODO
 inc/*
 t/save/*
+examples/LICENSE$
 blib/*
 .swp$
 .old$
