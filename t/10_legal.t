@@ -1,7 +1,7 @@
 
 
-use Test::Legal  license_ok   => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' } ,
-                 copyright_ok => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' } ,
+use Test::Legal  license_ok   => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
+                 copyright_ok => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
 ;
 
          

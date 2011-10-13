@@ -8,7 +8,6 @@ current = 10_basic.t
 current = 01c_coverage.t
 current = 01b_pod.t
 current = 08_script.t
-current = 10_legal.t
 current = 11_load_meta.t
 current = 12_find_authors.t
 current = 13_annotate.t
@@ -22,10 +21,11 @@ current = 20_namespace_clean.t
 current = 21_values.t
 current = 30_is_annotated.t
 current = 22_in_fix_mode.t
+current = 10_legal.t
 
 #all:li
-all: t
-#all: pod
+#all: t
+all: pod
 #all: $(current)
 
 tel:
@@ -35,8 +35,8 @@ tel:
 license_injector li:
 	perl $(OPT) ../script/license-injector.pl  ../examples -d  check 
 check add remove t list:
-	#perl $(OPT) ../script/copyright-injector.pl -d  ../examples   $@
-	perl $(OPT) ../script/license-injector.pl -d  ../examples   $@
+	perl $(OPT) ../script/copyright-injector.pl -d  ../examples   $@
+	#perl $(OPT) ../script/license-injector.pl -d  ../examples   $@
 pod: 
 	perldoc  ../blib/lib/Test/Legal.pm 
 podu: 

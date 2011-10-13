@@ -6,6 +6,7 @@
 
 
 
+
 Telephone::Mnemonic::Phone - Abstract Telephone Object
 
 =cut

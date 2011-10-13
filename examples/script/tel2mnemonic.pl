@@ -1,10 +1,5 @@
 #!/usr/bin/env perl
-
-
-
-
-
-
+# Copyright (C) 2011, Ioannis
 use strict; use warnings;
 use 5.010000;
 use Scalar::Util qw/ looks_like_number /;

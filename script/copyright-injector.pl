@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright (C) 2011, Ioannis
+
 use strict; 
 use warnings;
 use v5.10;
@@ -8,7 +8,7 @@ use Data::Dumper;
 use File::Slurp;
 use Test::Legal::Util qw/ howl_notice /;
 use Log::Log4perl ':easy';
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
@@ -38,6 +38,7 @@ use constant {  BASE   => shift || '.' ,
 };
 use Test::Legal  qw/ disable_test_builder annotate_dirs deannotate_dirs /,
                  copyright_ok=>{base=>BASE, dirs=> DIRS } ,
+                 #copyright_ok=>{base=>BASE, dirs=> DIRS, actions=>['fix'] } ,
 ;
 
 

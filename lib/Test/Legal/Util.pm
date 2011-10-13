@@ -1,10 +1,8 @@
 package Test::Legal::Util;
-# Copyright (C) 2011, Ioannis
-
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 #use Data::Show;
 use File::Slurp 'slurp';
 use CPAN::Meta;
@@ -254,7 +252,6 @@ Output: the specific license object
 sub license_text {
 	my ($type, $holder) = @_;
 	return unless $type||'' =~ /^\w{2,16}$/o;
-	#$holder //= find_authors();
 	$holder //= getlogin;
     $type = 'Software::License::'. ucfirst($type|| return);
 	eval "use $type";
@@ -288,7 +285,7 @@ sub check_META_file {
 	DEBUG '   license type is valid ....  ' .  (is_license_type($license) ? 'yes': 'no');
 	my $authors = find_authors($meta);
 	DEBUG '   authors ....  ' .  ($authors eq 'unknown' ? return : $authors);
-	my $text = license_text( $license, 'author');
+	my $text = license_text( $license, $authors||'unknown');
 	DEBUG '   license text is available ....  ' .  ($text ?'yes':'no');
 	return $text;
 }

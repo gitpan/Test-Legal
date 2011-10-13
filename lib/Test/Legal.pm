@@ -1,9 +1,9 @@
 package Test::Legal;
-# Copyright (C) 2011, Ioannis
 use v5.10;
+use Data::Dumper;
 use strict;
 use warnings;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use Sub::Exporter;
 
 use CPAN::Meta;
@@ -14,7 +14,7 @@ use Log::Log4perl ':easy';
 use List::Compare;
 use IO::Prompter;
 use Test::Builder::Module;
-use Test::Legal::Util qw/ annotate_copyright   deannotate_copyright load_meta write_LICENSE/;
+use Test::Legal::Util qw/ annotate_copyright   deannotate_copyright load_meta write_LICENSE /;
 
 
 use Sub::Exporter -setup => { exports => [ qw/ disable_test_builder annotate_dirs deannotate_dirs/, 
@@ -31,7 +31,7 @@ END   { $tb->done_testing; }
 
 =head1 NAME
 
-Test::Legal -  Check for copyright notices in distribution files and for LICENSE file
+Test::Legal -  Test and (optionally) fix copyright notices, LICENSE file, and relevant field of META file
 
 =head1 SYNOPSIS
 
@@ -40,25 +40,34 @@ Test::Legal -  Check for copyright notices in distribution files and for LICENSE
   copyright_ok;
   license_ok;
 
-  Or, here is the more refined way to acomplish the same thing
-  use Test::Legal  copyright_ok => { base=> $dir, dirs=> [qw/ sctipt lib /] } ,
-                   license_ok => { base=> $dir, actions => [qw/ fix /]},
-  ;
+  # Or, to fix things at the same time
+  use Test::Legal  copyright_ok => { actions =>['fix']},
+                   license_ok   => { actions =>['fix']};
 
-  # Note,  The  "actions=>['fix']"  automatically tries to fix things before they are tested.
+
+  # Here is the more refined way to acomplish the same thing
+  use Test::Legal  copyright_ok => { base=> $dir, dirs=> [qw/ sctipt lib /], actions=>['fix'] } ,
+                   license_ok => { base=> $dir, actions => [qw/ fix /]};
+
+
+  # Note,  The  "actions=>['fix']"  automatically fixes things so it can pass testing
  
 
 
 =head1 DESCRIPTION
 
- Checks for copyright notices in .pl and .pm distribution files, for author entry in META.yml
- or META.json, and for LICENSE file.
+   Checks for (a) copyright notices in .pl and .pm distribution files; (b) for author entry 
+ in META.yml or META.json, which ever peresent; and (c) for existence of LICENSE file, with the
+ correct license text autogenerate if so desired.
 
- You can add the copyright notices manually of use the copyright-injection.pl tool, supplied
- with this module, to add, to remove, or to check for notices automatically before tests.
+   Although you can alwyas add copyright notices manually to files, Test::Legal can fix things
+ for you if operated in 'fix' mode (see bellow); alternatively, use the tools available in
+ script/ named copyright-injection.pl an license-injection.pl .
 
- If "fix" mode is requested, some issues are automatically fixed so testing succeeds .
- Currently available only for license_ok but not for copyright_ok . See TODO list.
+=head2 Fix mode
+
+ When "fix" mode is requested, most issues are automatically fixed so testing succeeds 
+ with a harmless note() send to Test::Harness. 
 
 =head1 FUNCTIONS
 
@@ -104,6 +113,7 @@ sub _in_fix_mode {
 =cut
 sub set_of_files {
 	my ($pat, @dirs) =  @_;
+	$pat //= 'Copyright (C)';
 	$pat = qr/\Q$pat\E/i;
 	my @all_files = File::Find::Rule->file->name(qr/.*(\.pm|\.pl)$/o)->in(@dirs);
 	my @copyrighted = File::Find::Rule->file->name(qr/.*(\.pm|\.pl)$/o)-> grep($pat)->in(@dirs);
@@ -163,7 +173,12 @@ sub _build_copyright_ok {
 		my $pat = shift;
 		$pat //= 'Copyright (C)';
         my $l= set_of_files($pat, @dirs);
-        #$tb->ok( 0, $_ . ": $pat") for  $l->get_unique ;
+		if( (_in_fix_mode($arg)) && ($l->get_unique) ) {
+			# fix them by adding copyright notices
+			$tb->note( 'adding Copyright notices' )  if annotate_copyright([$l->get_unique],undef);
+			# re-scan for files without copyright
+			$l= set_of_files($pat, @dirs);
+		}
         $tb->ok( 0, $_ ) for  $l->get_unique ;
         $tb->ok( 1, $_ ) for  $l->get_intersection;
 		$l->get_unique;
@@ -189,6 +204,7 @@ sub _build_license_ok {
 
 1;
 __END__
+=pod
 
 =head1 EXPORT
 

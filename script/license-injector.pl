@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 # Copyright (C) 2011, Ioannis
+
 use strict; 
 use warnings;
 use v5.10;
@@ -8,7 +9,7 @@ use Data::Dumper;
 use File::Slurp;
 use Test::Legal::Util qw/ check_license_files  write_LICENSE license_types /; 
 use Log::Log4perl ':easy';
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
@@ -35,7 +36,6 @@ $opts = $o->opts;
 
 use constant {  BASE   => shift || '.' ,
 			    ACTION => shift||'check',
-	          #  DIRS   => [qw/ script lib /],
 };
 use Test::Legal  qw/ disable_test_builder /,
                  license_ok=>{ base=>BASE ,

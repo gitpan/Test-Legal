@@ -1,5 +1,5 @@
 ---
-abstract: ' Check for copyright notices in distribution files and for LICENSE file'
+abstract: ' Test and (optionally) fix copyright notices, LICENSE file, and relevant field of META file'
 author:
   - 'Tambouras, Ioannis <ioannis@cpan.org>'
   - 'Ioannis Tambouras <ioannis@cpan.org>'
@@ -47,4 +47,4 @@ requires:
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.05
+version: 0.06
