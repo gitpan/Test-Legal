@@ -3,7 +3,7 @@ package Test::Legal;
 use v5.10;
 use strict;
 use warnings;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 use Sub::Exporter;
 
 use CPAN::Meta;
@@ -14,7 +14,7 @@ use Log::Log4perl ':easy';
 use List::Compare;
 use IO::Prompter;
 use Test::Builder::Module;
-use Test::Legal::Util qw/ annotate_copyright   deannotate_copyright load_meta /;
+use Test::Legal::Util qw/ annotate_copyright   deannotate_copyright load_meta write_LICENSE/;
 
 
 use Sub::Exporter -setup => { exports => [ qw/ disable_test_builder annotate_dirs deannotate_dirs/, 
@@ -35,16 +35,18 @@ Test::Legal -  Check for copyright notices in distribution files and for LICENSE
 
 =head1 SYNOPSIS
 
-  use Test::Legal;
+  use Test::Legal;         
 
   copyright_ok;
-  legal_ok;
+  license_ok;
 
   Or, here is the more refined way to acomplish the same thing
   use Test::Legal  copyright_ok => { base=> $dir, dirs=> [qw/ sctipt lib /] } ,
-                   legal_ok => { base=> $dir},
+                   license_ok => { base=> $dir, actions => [qw/ fix /]},
   ;
 
+  # Note,  The  "actions=>['fix']"  automatically tries to fix things before they are tested.
+ 
 
 
 =head1 DESCRIPTION
@@ -54,6 +56,9 @@ Test::Legal -  Check for copyright notices in distribution files and for LICENSE
 
  You can add the copyright notices manually of use the copyright-injection.pl tool, supplied
  with this module, to add, to remove, or to check for notices automatically before tests.
+
+ If "fix" mode is requested, some issues are automatically fixed so testing succeeds .
+ Currently available only for license_ok but not for copyright_ok . See TODO list.
 
 =head1 FUNCTIONS
 
@@ -73,9 +78,25 @@ sub _values {
 	$arg //= {};
     return unless ref $arg eq 'HASH';	
     $arg = { %{DEFAULTS()}, %$arg };
+    $arg = { %{DEFAULTS()}, %$arg };
     ($arg->{ meta }) = load_meta( $arg->{base} )  ;
     $arg->{meta} || die 'no META file in dir "'. $arg->{base}.qq("\n);
     $arg;
+}
+=pod
+
+=head2  _in_fix_mode
+
+ Assumptions: $arg exists and has been validated
+ Input: the user arguments (a hashref)
+ Output: TRUE if "fix" mode was specified, otherwise FALSE
+
+=cut
+sub _in_fix_mode {
+    my $arg = shift;
+    return unless ref $arg eq 'HASH';	
+	return unless exists $arg->{actions};
+	first {$_ =~ /^fix$/i}  @{$arg->{actions}};
 }
 =pod
 
@@ -156,6 +177,11 @@ sub _build_license_ok {
     my ($class, $fun, $arg) = @_;
     $arg = _values($arg);  # keys : base, dirs , meta
     sub {
+        my $has_file =  -f $arg->{base}.'/LICENSE' ;
+		# attempt to fix?
+	    if ((_in_fix_mode($arg)) && (!$has_file)) {
+			$tb->note( 'added LICENSE' )  if  write_LICENSE($arg->{base}); 
+		}
         $tb->ok( -f $arg->{base}.'/LICENSE', 'dist contains LICENSE file');
         $tb->ok( @{[$arg->{meta}->license]} > 0 , 'META mentions license');
     }

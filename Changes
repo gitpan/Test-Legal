@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Legal.
 
+0.05  Tue Oct  12  8:02:52 2011
+	- Added "fix" mode so LICENSE file is added during testing and for the test to succeed
+	- fixed SYNOPSIS 
+
 0.04  Tue Oct  12  9:13:31 2011
 	-  Need to reverse "namespace::clean what is not needed" to enable testing
     -  Less dependence on EXPORT_OK

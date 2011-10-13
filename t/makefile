@@ -20,10 +20,11 @@ current = 18_find_license.t
 current = 19_check_meta.t
 current = 20_namespace_clean.t
 current = 21_values.t
-current = 22_is_annotated.t
+current = 30_is_annotated.t
+current = 22_in_fix_mode.t
 
-all:li
-##all: t
+#all:li
+all: t
 #all: pod
 #all: $(current)
 
@@ -32,7 +33,7 @@ tel:
 1* 0* 2*:
 	perl $(OPT) $@
 license_injector li:
-	perl $(OPT) ../script/license-injector.pl  ../examples -d  check
+	perl $(OPT) ../script/license-injector.pl  ../examples -d  check 
 check add remove t list:
 	#perl $(OPT) ../script/copyright-injector.pl -d  ../examples   $@
 	perl $(OPT) ../script/license-injector.pl -d  ../examples   $@

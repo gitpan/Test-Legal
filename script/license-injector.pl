@@ -8,7 +8,7 @@ use Data::Dumper;
 use File::Slurp;
 use Test::Legal::Util qw/ check_license_files  write_LICENSE license_types /; 
 use Log::Log4perl ':easy';
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
@@ -38,7 +38,9 @@ use constant {  BASE   => shift || '.' ,
 	          #  DIRS   => [qw/ script lib /],
 };
 use Test::Legal  qw/ disable_test_builder /,
-                 license_ok=>{base=>BASE } ,
+                 license_ok=>{ base=>BASE ,
+					           #actions => [qw/ fix /] ,
+                 } ,
 ;
 
 DEBUG 'Scanning '. BASE ;
