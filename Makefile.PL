@@ -13,6 +13,7 @@ author         'Ioannis Tambouras <ioannis@cpan.org>';
 requires 
 #        'Moose'               => '2.0007',
 #        'namespace::autoclean'=> '0.12',
+         'namespace::clean'      => '0.21',
 	     'Log::Log4perl'         => '1.33',
          'Getopt::Compact'       => '0.04',
 	     'List::MoreUtils'       => '0.32',

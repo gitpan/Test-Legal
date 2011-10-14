@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Legal.
 
+0.07  Tue Oct  14  11:23:29 2011
+	- Slight improvement in API for sub::exporter. Needs more.
+	- started testing importers with namespace::clean
+
 0.06  Tue Oct  12  9:09:12 2011
 	- fixed check_META_file() so that LICENSE file bears the correct author(s)
 	- Added "fix" mode for copyright 

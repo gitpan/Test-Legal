@@ -3,7 +3,7 @@ use v5.10;
 use Data::Dumper;
 use strict;
 use warnings;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use Sub::Exporter;
 
 use CPAN::Meta;
@@ -20,7 +20,11 @@ use Test::Legal::Util qw/ annotate_copyright   deannotate_copyright load_meta wr
 use Sub::Exporter -setup => { exports => [ qw/ disable_test_builder annotate_dirs deannotate_dirs/, 
  										  copyright_ok => \'_build_copyright_ok' ,
                                            license_ok   => \'_build_license_ok'],
-                              groups  => { default => [qw/ copyright_ok license_ok /] }, };
+                              groups  => { default => [qw/ copyright_ok license_ok /],
+                                           core    => [qw/ copyright_ok license_ok /]
+                                         },
+		                      collectors => [qw/ defaults /]
+}; 
 use constant DEFAULTS =>  { base      => '.',
                             dirs      => [ qw/ lib script /],
 };
@@ -41,8 +45,7 @@ Test::Legal -  Test and (optionally) fix copyright notices, LICENSE file, and re
   license_ok;
 
   # Or, to fix things at the same time
-  use Test::Legal  copyright_ok => { actions =>['fix']},
-                   license_ok   => { actions =>['fix']};
+  use Test::Legal  -core  => { actions =>['fix']};
 
 
   # Here is the more refined way to acomplish the same thing
@@ -83,11 +86,11 @@ sub disable_test_builder {
 
 =cut
 sub _values {
-    my $arg = shift;
-	$arg //= {};
-    return unless ref $arg eq 'HASH';	
-    $arg = { %{DEFAULTS()}, %$arg };
-    $arg = { %{DEFAULTS()}, %$arg };
+    my ($arg, $defaults) = @_;
+	$arg //= {}; $defaults //= {};
+    return unless ref $arg      eq 'HASH';	
+    return unless ref $defaults eq 'HASH';	
+    $arg = { %{DEFAULTS()}, %$defaults, %$arg };
     ($arg->{ meta }) = load_meta( $arg->{base} )  ;
     $arg->{meta} || die 'no META file in dir "'. $arg->{base}.qq("\n);
     $arg;
@@ -166,8 +169,8 @@ sub deannotate_dirs {
 =head2  _build_copyright_ok
 =cut
 sub _build_copyright_ok {
-    my ($class, $fun, $arg) = @_;
-    $arg       = _values($arg);  
+    my ($class, $fun, $arg, $defaults) = @_;
+    $arg = _values($arg, $defaults);  # keys : base, dirs , meta
     my @dirs   = map {$arg->{base} . "/$_"} @{$arg->{dirs}};
     sub {
 		my $pat = shift;
@@ -189,8 +192,8 @@ sub _build_copyright_ok {
 =head2  _build_license_ok
 =cut
 sub _build_license_ok {
-    my ($class, $fun, $arg) = @_;
-    $arg = _values($arg);  # keys : base, dirs , meta
+    my ($class, $fun, $arg, $defaults) = @_;
+    $arg = _values($arg, $defaults);  # keys : base, dirs , meta
     sub {
         my $has_file =  -f $arg->{base}.'/LICENSE' ;
 		# attempt to fix?

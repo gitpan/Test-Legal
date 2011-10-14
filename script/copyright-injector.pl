@@ -8,7 +8,7 @@ use Data::Dumper;
 use File::Slurp;
 use Test::Legal::Util qw/ howl_notice /;
 use Log::Log4perl ':easy';
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},

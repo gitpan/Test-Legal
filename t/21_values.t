@@ -25,8 +25,32 @@ is_deeply [sort keys %{_values()}   ] , $required_keys;
 
 ok ! _values([]);
 
-TODO: {
-	local $TODO = 'why does it fail?';
-	ok ! _values();
-}
+note 'with collector';
+my $h = _values(  {a=>8, b=>9}, {a=>1, b=>2} );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {a=>8,b=>9} ;
+
+$h = _values(  {a=>8 }, {a=>1, b=>2} );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {a=>8,b=>2} ;
+
+$h = _values(  { }, {a=>1, b=>2} );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {a=>1,b=>2} ;
+
+$h = _values(  {a=>8, b=>9 }, {} );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {a=>8,b=>9} ;
+
+$h = _values(  {a=>8, b=>9 },  );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {a=>8,b=>9} ;
+
+$h = _values(  {}, {}  );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {} ;
+
+$h = _values(  );
+delete @{$h}{qw/dirs meta base/};
+is_deeply $h, {} ;
 

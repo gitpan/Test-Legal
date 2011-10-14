@@ -44,7 +44,8 @@ requires:
   Software::License: 0.103002
   Sub::Exporter: 0.982
   Test::Builder::Module: 0.98
+  namespace::clean: 0.21
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.06
+version: 0.07
