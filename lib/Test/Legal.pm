@@ -3,7 +3,7 @@ use v5.10;
 use Data::Dumper;
 use strict;
 use warnings;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 use Sub::Exporter;
 
 use CPAN::Meta;
@@ -49,8 +49,10 @@ Test::Legal -  Test and (optionally) fix copyright notices, LICENSE file, and re
 
 
   # Here is the more refined way to acomplish the same thing
-  use Test::Legal  copyright_ok => { base=> $dir, dirs=> [qw/ sctipt lib /], actions=>['fix'] } ,
-                   license_ok => { base=> $dir, actions => [qw/ fix /]};
+  use Test::Legal  copyright_ok => {  dirs=> [qw/ sctipt lib /] } ,
+                   'license_ok' ,
+                   defaults     => { base=> $dir, actions => [qw/ fix /]}
+  ;
 
 
   # Note,  The  "actions=>['fix']"  automatically fixes things so it can pass testing
@@ -91,24 +93,22 @@ sub _values {
     return unless ref $arg      eq 'HASH';	
     return unless ref $defaults eq 'HASH';	
     $arg = { %{DEFAULTS()}, %$defaults, %$arg };
-    ($arg->{ meta }) = load_meta( $arg->{base} )  ;
-    $arg->{meta} || die 'no META file in dir "'. $arg->{base}.qq("\n);
+    ($arg->{ meta }) = load_meta($arg->{base}) || die 'no META file in dir "'. $arg->{base}.qq("\n);
     $arg;
 }
-=pod
-
-=head2  _in_fix_mode
+=head2  _in_mode
 
  Assumptions: $arg exists and has been validated
  Input: the user arguments (a hashref)
- Output: TRUE if "fix" mode was specified, otherwise FALSE
+ Output: TRUE if "dry" mode was specified, otherwise FALSE
 
 =cut
-sub _in_fix_mode {
-    my $arg = shift;
+sub _in_mode {
+    my ($arg,$mode) = @_;
+	return unless $mode;
     return unless ref $arg eq 'HASH';	
 	return unless exists $arg->{actions};
-	first {$_ =~ /^fix$/i}  @{$arg->{actions}};
+	first {$_ =~ /^$mode$/i}  @{$arg->{actions}};
 }
 =pod
 
@@ -170,13 +170,14 @@ sub deannotate_dirs {
 =cut
 sub _build_copyright_ok {
     my ($class, $fun, $arg, $defaults) = @_;
-    $arg = _values($arg, $defaults);  # keys : base, dirs , meta
+    $arg = _values($arg, $defaults->{defaults});  # keys : base, dirs , meta
     my @dirs   = map {$arg->{base} . "/$_"} @{$arg->{dirs}};
     sub {
+	    return ('noop', $arg)  if _in_mode($arg,'noop');
 		my $pat = shift;
 		$pat //= 'Copyright (C)';
         my $l= set_of_files($pat, @dirs);
-		if( (_in_fix_mode($arg)) && ($l->get_unique) ) {
+		if( (_in_mode($arg,'fix')) && ($l->get_unique) ) {
 			# fix them by adding copyright notices
 			$tb->note( 'adding Copyright notices' )  if annotate_copyright([$l->get_unique],undef);
 			# re-scan for files without copyright
@@ -193,20 +194,19 @@ sub _build_copyright_ok {
 =cut
 sub _build_license_ok {
     my ($class, $fun, $arg, $defaults) = @_;
-    $arg = _values($arg, $defaults);  # keys : base, dirs , meta
+    $arg = _values($arg, $defaults->{defaults});  # keys : base, dirs , meta
     sub {
+	    return ('noop', $arg)  if _in_mode($arg,'noop');
         my $has_file =  -f $arg->{base}.'/LICENSE' ;
 		# attempt to fix?
-	    if ((_in_fix_mode($arg)) && (!$has_file)) {
+	    if ((_in_mode($arg,'fix')) && (!$has_file)) {
 			$tb->note( 'added LICENSE' )  if  write_LICENSE($arg->{base}); 
 		}
         $tb->ok( -f $arg->{base}.'/LICENSE', 'dist contains LICENSE file');
         $tb->ok( @{[$arg->{meta}->license]} > 0 , 'META mentions license');
     }
 }
-
 1;
-__END__
 =pod
 
 =head1 EXPORT

@@ -43,6 +43,7 @@ t/19_check_meta.t
 t/20_namespace_clean.t
 t/21_values.t
 t/22_in_fix_mode.t
+t/22_is_mode.t
 t/23_importer.t
 t/30_is_annotated.t
 t/dat/bak/apple

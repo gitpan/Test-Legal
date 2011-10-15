@@ -19,10 +19,10 @@ current = 18_find_license.t
 current = 19_check_meta.t
 current = 20_namespace_clean.t
 current = 21_values.t
-current = 22_in_fix_mode.t
+current = 22_is_mode.t
 current = 30_is_annotated.t
-current = 10_legal.t
 current = 23_importer.t
+current = 10_legal.t
 
 #all:li
 #all: t
