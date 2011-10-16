@@ -6,9 +6,9 @@ use v5.10;
 use Getopt::Compact;
 use Data::Dumper;
 use File::Slurp;
-use Test::Legal::Util qw/ howl_notice /;
+use Test::Legal::Util qw/ license_types load_meta howl_notice /;
 use Log::Log4perl ':easy';
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
@@ -21,7 +21,7 @@ BEGIN {
 Log::Log4perl->easy_init( LOG_PARAM() , { %{LOG_PARAM()}, category=>'Test::Legal'} );
 
 $o = new Getopt::Compact 
-    modes  => [qw( yes )],
+    modes  => [qw( yes licenses)],
 	args   => 'dir  [check|add|remove|t]',
 	struct => [ 
             [[qw(c copyright)], 'copyright_noitce'],
@@ -36,9 +36,14 @@ use constant {  BASE   => shift || '.' ,
 			    ACTION => shift||'check',
 	            DIRS   => [qw/ script lib /],
 };
+## Option Processing
+$opts->{licenses} and INFO join "\t", license_types and exit;
+## Error Checking
+load_meta BASE or ERROR qq(no META file found in dir ").BASE.qq(". Aborting...) and exit;
+
+eval q(
 use Test::Legal  qw/ disable_test_builder annotate_dirs deannotate_dirs /,
                  copyright_ok=>{base=>BASE, dirs=> DIRS } ,
-                 #copyright_ok=>{base=>BASE, dirs=> DIRS, actions=>['fix'] } ,
 ;
 
 
@@ -66,4 +71,5 @@ given (ACTION) {
                       }
 	default:            INFO	 $o->usage and exit; 
 }
-
+1;
+) or say $@;

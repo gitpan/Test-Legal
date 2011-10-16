@@ -4,6 +4,7 @@ author:
   - 'Tambouras, Ioannis <ioannis@cpan.org>'
   - 'Ioannis Tambouras <ioannis@cpan.org>'
 build_requires:
+  Expect: 1.21
   ExtUtils::MakeMaker: 6.42
   File::Copy: 2.18
   Test::CPAN::Meta: 0.18
@@ -17,6 +18,7 @@ build_requires:
   Test::Spelling: 0.15
   Test::Strict: 0.14
   Test::t: 0.0031
+  namespace::clean: 0.21
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
@@ -44,8 +46,7 @@ requires:
   Software::License: 0.103002
   Sub::Exporter: 0.982
   Test::Builder::Module: 0.98
-  namespace::clean: 0.21
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.08
+version: 0.09

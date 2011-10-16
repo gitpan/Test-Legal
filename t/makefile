@@ -8,6 +8,7 @@ current = 10_basic.t
 current = 01c_coverage.t
 current = 01b_pod.t
 current = 08_script.t
+current = 10_legal.t
 current = 11_load_meta.t
 current = 12_find_authors.t
 current = 13_annotate.t
@@ -22,19 +23,22 @@ current = 21_values.t
 current = 22_is_mode.t
 current = 30_is_annotated.t
 current = 23_importer.t
-current = 10_legal.t
+current = 60_copyright-injector.t
+current = 50_license-injector.t
 
-#all:li
+#all:ci
 #all: t
 #all: pod
 all: $(current)
 
 tel:
 	$(vi)  ../examples/script/tel2num.pl   ../examples/script/tel2mnemonic.pl
-1* 0* 2*:
+1* 0* 2* 3* 4* 5* 6*:
 	perl $(OPT) $@
 license_injector li:
-	perl $(OPT) ../script/license-injector.pl  ../examples -d  check 
+	perl $(OPT) ../script/license-injector.pl  ../t/dat/bak -d  check 
+copyright_injector ci:
+	perl $(OPT) ../script/copyright-injector.pl  ../t/dat/bak -d  check 
 check add remove t list:
 	perl $(OPT) ../script/copyright-injector.pl -d  ../examples   $@
 	#perl $(OPT) ../script/license-injector.pl -d  ../examples   $@

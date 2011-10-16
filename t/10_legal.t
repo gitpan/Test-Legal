@@ -1,32 +1,28 @@
-use Test::More;
-
 
 use Test::More;
 
-use Test::Legal  #license_ok   => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
-                 #copyright_ok => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
-                 -core => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
-                 defaults => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
-;
-BEGIN {
-    can_ok 'main','license_ok';
-    can_ok 'main','copyright_ok';
+#license_ok   => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
+#copyright_ok => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']} ,
+use Test::Legal -core => { base=> $ENV{PWD} =~ m#\/t$#  ? '..' : '.' , actions=>['fix']}  ;
+
+BEGIN { can_ok 'main',$_   for qw/ license_ok copyright_ok / }
+
+BEGIN{
+	use namespace::clean;
+	no namespace::clean;
 }
 
-use namespace::clean;
- no namespace::clean;
+use Test::More;
 
+BEGIN { ok ! UNIVERSAL::can( 'main',$_ ),  "removed $_"  for qw/ copyright_ok license_ok / }
 BEGIN { $::dir  = $ENV{PWD} =~ m#\/t$#  ? '..' : '.' ; }
 
-use Test::Legal  copyright_ok => {  dirs=> [qw/ sctipt lib /] },
+use Test::Legal  'copyright_ok',
 	             'license_ok',
                  defaults     => { base=> $::dir, actions => [qw/ fix /] }
 ;         
 
-BEGIN {
-    can_ok 'main','license_ok';
-    can_ok 'main','copyright_ok';
-	
-}
+can_ok 'main',$_   for qw/ license_ok copyright_ok/;
 
-
+license_ok;
+copyright_ok;;

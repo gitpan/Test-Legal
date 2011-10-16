@@ -13,7 +13,6 @@ author         'Ioannis Tambouras <ioannis@cpan.org>';
 requires 
 #        'Moose'               => '2.0007',
 #        'namespace::autoclean'=> '0.12',
-         'namespace::clean'      => '0.21',
 	     'Log::Log4perl'         => '1.33',
          'Getopt::Compact'       => '0.04',
 	     'List::MoreUtils'       => '0.32',
@@ -29,6 +28,8 @@ requires
 ;
 test_requires 'Test::Pod::Coverage' => '1.08',
               'Test::Pod'           => '1.45',
+              'namespace::clean'    => '0.21',
+	          'Expect'              => '1.21',
               'Test::HasVersion'    => '0.012',
               'Test::CPAN::Meta'    => '0.18',
               'Test::Exception'     => '0.31',
