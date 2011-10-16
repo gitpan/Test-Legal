@@ -45,6 +45,8 @@ t/21_values.t
 t/22_is_mode.t
 t/23_importer.t
 t/30_is_annotated.t
+t/50_license-injector.t
+t/60_copyright-injector.t
 t/dat/bak/apple
 t/dat/bak/black
 t/dat/bak/blank

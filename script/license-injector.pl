@@ -9,7 +9,7 @@ use Data::Dumper;
 use File::Slurp;
 use Test::Legal::Util qw/ load_meta check_license_files  write_LICENSE license_types /; 
 use Log::Log4perl ':easy';
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use constant { 
 	LOG_PARAM  => { File=>'STDOUT', level=>$INFO, layout=>'%m%n', category=>'main'},
